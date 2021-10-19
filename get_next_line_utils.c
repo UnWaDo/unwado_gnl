@@ -6,7 +6,7 @@
 /*   By: lalex <lalex@students.21-school.ru>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/14 11:06:44 by lalex             #+#    #+#             */
-/*   Updated: 2021/10/16 13:11:13 by lalex            ###   ########.fr       */
+/*   Updated: 2021/10/19 12:48:15 by lalex            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,39 +24,6 @@ size_t	ft_strlen(const char *str)
 	return (len);
 }
 
-size_t	ft_strlcpy(char *dst, const char *src, size_t dstsize)
-{
-	size_t	pos;
-	size_t	len;
-
-	len = ft_strlen(src);
-	if (!dstsize)
-		return (len);
-	pos = 0;
-	dstsize--;
-	while (pos < len && pos < dstsize)
-	{
-		dst[pos] = src[pos];
-		pos++;
-	}
-	dst[pos] = '\0';
-	return (len);
-}
-
-char	*ft_strdup(const char *s1)
-{
-	size_t	len;
-	char	*copy;
-
-	len = ft_strlen(s1) + 1;
-	copy = malloc(sizeof(*copy) * len);
-	if (!copy)
-		return (NULL);
-	ft_strlcpy(copy, s1, len);
-	return (copy);
-}
-
-
 char	*ft_strchr(const char *s, int c)
 {
 	char	search;
@@ -73,19 +40,35 @@ char	*ft_strchr(const char *s, int c)
 	return (NULL);
 }
 
-void	*ft_memset(void *b, int c, size_t len)
+void	*ft_calloc(size_t count, size_t size)
 {
-	unsigned char	byte;
-	unsigned char	*b_char;
-	size_t			i;
+	char	*res;
+	size_t	len;
 
-	byte = (unsigned char) c;
-	b_char = b;
-	i = 0;
-	while (i < len)
+	len = count * size;
+	res = malloc(len);
+	if (!res)
+		return (NULL);
+	while (len--)
+		res[len] = 0;
+	return (res);
+}
+
+char	*ft_realloc_str(char *str, size_t additional)
+{
+	size_t	length;
+	size_t	pos;
+	char	*copy;
+
+	length = ft_strlen(str);
+	copy = ft_calloc(length + additional + 1, sizeof (*copy));
+	if (!copy)
+		return (NULL);
+	pos = 0;
+	while (pos < length)
 	{
-		b_char[i] = byte;
-		i++;
+		copy[pos] = str[pos];
+		pos++;
 	}
-	return (b);
+	return (copy);
 }
