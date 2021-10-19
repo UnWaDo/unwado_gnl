@@ -6,7 +6,7 @@
 /*   By: lalex <lalex@students.21-school.ru>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/13 21:59:05 by lalex             #+#    #+#             */
-/*   Updated: 2021/10/19 12:48:16 by lalex            ###   ########.fr       */
+/*   Updated: 2021/10/19 13:06:20 by lalex            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,10 +95,18 @@ char	*pop_beginning(t_fdlst *lst, size_t size)
 	while (lst->buffer[pos])
 	{
 		lst->buffer[pos - size] = lst->buffer[pos];
+		lst->buffer[pos] = 0;
+		pos++;
+	}
+	while (lst->buffer[pos - size])
+	{
+		lst->buffer[pos - size] = 0;
 		pos++;
 	}
 	return (str);
 }
+
+#include <stdio.h>
 
 char	*get_next_line(int fd)
 {
