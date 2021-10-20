@@ -6,7 +6,7 @@
 /*   By: lalex <lalex@students.21-school.ru>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/13 21:59:05 by lalex             #+#    #+#             */
-/*   Updated: 2021/10/19 13:06:20 by lalex            ###   ########.fr       */
+/*   Updated: 2021/10/21 00:03:29 by lalex            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,55 +23,27 @@ t_fdlst	*find_fd(t_fdlst *lst, int fd)
 	return (NULL);
 }
 
-t_fdlst	*append_fd(t_fdlst **lst, int fd)
-{
-	t_fdlst	*new;
-
-	new = ft_calloc(1, sizeof (*new));
-	if (!new)
-		return (NULL);
-	new->fd = fd;
-	new->buffer = ft_calloc(BUFFER_SIZE + 1, sizeof (*(new->buffer)));
-	if (new->buffer == NULL)
-	{
-		free(new);
-		return (NULL);
-	}
-	if (*lst)
-		new->next = *lst;
-	*lst = new;
-	return (new);
-}
-
-void	pop_fd(t_fdlst **lst, int fd)
+void	*pop_fd(t_fdlst **lst, int fd)
 {
 	t_fdlst	*previous;
-	t_fdlst	*found;
+	t_fdlst	*current;
 
-	if (*lst == NULL)
-		return ;
-	found = NULL;
-	if ((*lst)->fd == fd)
-		found = *lst;
-	previous = *lst;
-	while (!found && previous->next)
+	current = *lst;
+	while (current && current->fd != fd)
 	{
-		if ((previous->next)->fd == fd)
-		{
-			found = previous->next;
-			break ;
-		}
-		previous = (previous->next);
+		previous = current;
+		current = current->next;
 	}
-	if (!found)
-		return ;
-	if (found == *lst)
-		*lst = found->next;
+	if (!current)
+		return (NULL);
+	if (current == *lst)
+		*lst = current->next;
 	else
-		previous->next = found->next;
-	if (found->buffer)
-		free(found->buffer);
-	free(found);
+		previous->next = current->next;
+	if (current->buffer)
+		free(current->buffer);
+	free(current);
+	return (NULL);
 }
 
 char	*pop_beginning(t_fdlst *lst, size_t size)
@@ -79,9 +51,7 @@ char	*pop_beginning(t_fdlst *lst, size_t size)
 	char	*str;
 	size_t	pos;
 
-	if (!lst)
-		return (NULL);
-	if (lst->buffer == NULL)
+	if (lst == NULL || lst->buffer == NULL)
 		return (NULL);
 	str = ft_calloc(size + 1, sizeof (*str));
 	if (!str)
@@ -106,49 +76,53 @@ char	*pop_beginning(t_fdlst *lst, size_t size)
 	return (str);
 }
 
-#include <stdio.h>
+t_fdlst	*prepare_cfd(int fd, t_fdlst **lst)
+{
+	t_fdlst			*cfd;
+
+	cfd = find_fd(*lst, fd);
+	if (!cfd)
+	{
+		cfd = ft_calloc(1, sizeof (*cfd));
+		if (!cfd)
+			return (NULL);
+		cfd->fd = fd;
+		if (*lst)
+			cfd->next = *lst;
+		*lst = cfd;
+	}
+	if (cfd->buffer == NULL)
+		cfd->buffer = ft_calloc(BUFFER_SIZE + 1, 1);
+	if (cfd->buffer == NULL)
+		return (pop_fd(lst, fd));
+	return (cfd);
+}
 
 char	*get_next_line(int fd)
 {
 	static t_fdlst	*fds;
 	t_fdlst			*cfd;
-	ssize_t			length;
+	int				eof;
 	char			*line;
 	char			*newline;
 
-	cfd = find_fd(fds, fd);
-	if (!cfd)
-		cfd = append_fd(&fds, fd);
+	cfd = prepare_cfd(fd, &fds);
 	if (!cfd)
 		return (NULL);
-	if (cfd->buffer == NULL)
-		cfd->buffer = ft_calloc(BUFFER_SIZE + 1, 1);
-	if (cfd->buffer == NULL)
-	{
-		pop_fd(&fds, fd);
-		return (NULL);
-	}
 	newline = ft_strchr(cfd->buffer, '\n');
 	if (newline)
 	{
 		line = pop_beginning(cfd, newline - (cfd->buffer) + 1);
+		if (!line)
+			return (pop_fd(&fds, fd));
 		return (line);
 	}
-	if (ft_strlen(cfd->buffer))
-	{
-		line = ft_realloc_str(cfd->buffer, BUFFER_SIZE);
-		if (!line)
-		{
-			pop_fd(&fds, fd);
-			return (NULL);
-		}
-		free(cfd->buffer);
-		cfd->buffer = line;
-	}
-	length = read(fd, cfd->buffer + ft_strlen(cfd->buffer), BUFFER_SIZE);
-	if (length < 1)
+	line = read_more(cfd, &eof);
+	if (!line || eof)
 	{
 		pop_fd(&fds, fd);
+		if (ft_strlen(line))
+			return (line);
 		return (NULL);
 	}
 	return (get_next_line(fd));

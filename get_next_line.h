@@ -6,7 +6,7 @@
 /*   By: lalex <lalex@students.21-school.ru>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/13 21:58:46 by lalex             #+#    #+#             */
-/*   Updated: 2021/10/19 12:49:18 by lalex            ###   ########.fr       */
+/*   Updated: 2021/10/20 23:53:28 by lalex            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,8 @@ t_fdlst	*append_fd(t_fdlst **lst, int fd);
 // Removes t_fdlst with fd `fd` from list and frees 
 // `buffer` and itself
 // If `*lst` is NULL, does nothing
-void	pop_fd(t_fdlst **lst, int fd);
+// Always returns NULL
+void	*pop_fd(t_fdlst **lst, int fd);
 
 // Allocates string from `lst->buffer` including size symbols
 // from the beginning. After this modify `lst->buffer` to begin
@@ -69,6 +70,16 @@ void	*ft_calloc(size_t count, size_t size);
 // Old string must be freed manually
 // Zero byte is not counted in `additional`
 char	*ft_realloc_str(char *str, size_t additional);
+
+// Reallocates `cfd->buffer` increasing it's size
+// to `ft_strlen(cfd->buffer)` + BUFFER_SIZE
+// Always sets flag `eof` to 0, changes it to 1
+// if read proceeds with less than BUFFER_SIZE
+// Returns NULL if allocation fails
+// Returns `cfd->buffer` if read completely
+// If read proceeds with less than BUFFER_SIZE,
+// unbing buffer from cfd and returns it
+char	*read_more(t_fdlst *cfd, int *eof);
 
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 42

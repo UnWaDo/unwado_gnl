@@ -6,7 +6,7 @@
 /*   By: lalex <lalex@students.21-school.ru>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/14 11:06:44 by lalex             #+#    #+#             */
-/*   Updated: 2021/10/19 12:48:15 by lalex            ###   ########.fr       */
+/*   Updated: 2021/10/20 23:52:56 by lalex            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,4 +71,29 @@ char	*ft_realloc_str(char *str, size_t additional)
 		pos++;
 	}
 	return (copy);
+}
+
+char	*read_more(t_fdlst *cfd, int *eof)
+{
+	char			*line;
+	ssize_t			length;
+
+	*eof = 0;
+	if (ft_strlen(cfd->buffer))
+	{
+		line = ft_realloc_str(cfd->buffer, BUFFER_SIZE);
+		if (!line)
+			return (NULL);
+		free(cfd->buffer);
+		cfd->buffer = line;
+	}
+	length = read(cfd->fd, cfd->buffer + ft_strlen(cfd->buffer), BUFFER_SIZE);
+	if (length < BUFFER_SIZE)
+	{
+		*eof = 1;
+		line = cfd->buffer;
+		cfd->buffer = NULL;
+		return (line);
+	}
+	return (cfd->buffer);
 }
