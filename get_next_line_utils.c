@@ -6,7 +6,7 @@
 /*   By: lalex <lalex@students.21-school.ru>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/14 11:06:44 by lalex             #+#    #+#             */
-/*   Updated: 2021/10/20 23:52:56 by lalex            ###   ########.fr       */
+/*   Updated: 2021/10/21 13:23:38 by lalex            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,20 +24,18 @@ size_t	ft_strlen(const char *str)
 	return (len);
 }
 
-char	*ft_strchr(const char *s, int c)
+size_t	ft_line_length(const char *s)
 {
-	char	search;
+	size_t	len;
 
-	search = (char) c;
-	while (*s)
-	{
-		if (*s == search)
-			return ((char *) s);
-		s++;
-	}
-	if (*s == search)
-		return ((char *) s);
-	return (NULL);
+	if (!s)
+		return (0);
+	len = 0;
+	while (s[len] && s[len] != '\n')
+		len++;
+	if (s[len] == '\n')
+		return (len + 1);
+	return (0);
 }
 
 void	*ft_calloc(size_t count, size_t size)
@@ -73,27 +71,20 @@ char	*ft_realloc_str(char *str, size_t additional)
 	return (copy);
 }
 
-char	*read_more(t_fdlst *cfd, int *eof)
+void	shift_buffer(char *buffer, size_t shift)
 {
-	char			*line;
-	ssize_t			length;
+	size_t	pos;
 
-	*eof = 0;
-	if (ft_strlen(cfd->buffer))
+	pos = shift;
+	while (buffer[pos])
 	{
-		line = ft_realloc_str(cfd->buffer, BUFFER_SIZE);
-		if (!line)
-			return (NULL);
-		free(cfd->buffer);
-		cfd->buffer = line;
+		buffer[pos - shift] = buffer[pos];
+		buffer[pos] = 0;
+		pos++;
 	}
-	length = read(cfd->fd, cfd->buffer + ft_strlen(cfd->buffer), BUFFER_SIZE);
-	if (length < BUFFER_SIZE)
+	while (buffer[pos - shift])
 	{
-		*eof = 1;
-		line = cfd->buffer;
-		cfd->buffer = NULL;
-		return (line);
+		buffer[pos - shift] = 0;
+		pos++;
 	}
-	return (cfd->buffer);
 }
