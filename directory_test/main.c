@@ -6,7 +6,7 @@
 /*   By: lalex <lalex@students.21-school.ru>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/13 22:05:34 by lalex             #+#    #+#             */
-/*   Updated: 2021/10/20 21:10:25 by lalex            ###   ########.fr       */
+/*   Updated: 2021/10/21 14:46:31 by lalex            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,10 +24,10 @@ void directory_test()
 	if (line)
 	{
 		free(line);
-		printf("Does not work with folders");
+		printf("\033[0;31mDoes not work with folders\033[0m\n");
 	}
 	else
-		printf("Grade: OK\n");
+		printf("\033[0;32mGrade: OK\033[0m\n");
 	close(fd_read);
 }
 

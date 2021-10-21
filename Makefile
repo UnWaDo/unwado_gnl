@@ -6,11 +6,16 @@ HEADERS = $(addprefix $(GNL_DIR), $(GNL_HEADERS_NAMES))
 SOURCES = $(SOURCES_NAMES) $(addprefix $(GNL_DIR), $(GNL_SOURCES_NAMES))
 OBJECTS = $(SOURCES:.c=.o)
 EXEC = clang
-CFLAGS = -Wall -Wextra -Werror -fsanitize=address
+CFLAGS = -Wall -Wextra -Werror
+#CFLAGS += -fsanitize=address
 ifndef BUFFER_SIZE
 	BUFFER_SIZE = 42
 endif
 BUFFER_FLAG = -D BUFFER_SIZE=$(BUFFER_SIZE)
+
+CLR_HDR = '\033[0;35m'
+CLR_NC = '\033[0m'
+CLR_STRT = '\033[0;36m'
 
 TESTS = init check_files simple_test stdin_test directory_test bonus_test
 SIMPLE_TEST_OBJS = simple_test/main.o
@@ -23,8 +28,7 @@ TESTS_PROGS = simple_test/simple_test stdin_test/stdin_test directory_test/direc
 
 all:			$(TESTS)
 
-%.o:			%.c $(HEADERS) Makefile
-	@echo Compiling file $<
+%.o:			%.c $(HEADERS)
 	@$(EXEC) $(CFLAGS) -o $@ -c $< $(BUFFER_FLAG) -I$(GNL_DIR)
 
 %.h:
@@ -34,11 +38,14 @@ all:			$(TESTS)
 	@echo File $@ is absent, make sure you have correct naming
 	$(error No C file $@ found)
 
+init:	TITLE = Performing check for BUFFER_SIZE=$(BUFFER_SIZE)
 init:
-	rm -f errors.log
+	@echo $(CLR_STRT)"--$(TITLE)--"$(CLR_NC)
+	@rm -f errors.log
 
+check_files:	TITLE = Performing file checking
 check_files:
-	@echo --Performing file checking--
+	@echo $(CLR_HDR)"--$(TITLE)--"$(CLR_NC)
 	@for file in $(SOURCES) $(HEADERS); do \
 		if test -f "$$file"; then \
 			echo File $${file##*/} exists; \
@@ -47,27 +54,43 @@ check_files:
 		fi \
 	done
 
-simple_test: TEST_DIR = simple_test
-simple_test:	$(SIMPLE_TEST_OBJS) $(OBJECTS) $(HEADERS) Makefile
-	@echo --Performing Simple Test--
-	@$(EXEC) $(CFLAGS) $(SIMPLE_TEST_OBJS) $(OBJECTS) -o $(TEST_DIR)/$@
-	@cd $(TEST_DIR) && bash $(TEST_DIR).sh
+simple_test:	TEST_DIR = simple_test
+simple_test:	TESTS_OBJS = $(SIMPLE_TEST_OBJS)
+simple_test:	TITLE = Performing simple test
+simple_test:	TEST_PREPARATION = $(EXEC) $(CFLAGS) \
+			$(TESTS_OBJS) $(OBJECTS) -o $(TEST_DIR)/$(TEST_DIR)
+simple_test:	TEST_PERFORMING = cd $(TEST_DIR) && bash $(TEST_DIR).sh
+simple_test: $(TESTS_OBJS) $(OBJECTS) $(HEADERS)
+	@echo $(CLR_HDR)"--$(TITLE)--"$(CLR_NC)
+	@$(TEST_PREPARATION)
+	@$(TEST_PERFORMING)
 
-stdin_test: TEST_DIR = stdin_test
-stdin_test:	$(STDIN_TEST_OBJS) $(OBJECTS) $(HEADERS) Makefile
-	@echo --Compiling Stdin test. You can perform it manually--
-	@$(EXEC) $(CFLAGS) $(STDIN_TEST_OBJS) $(OBJECTS) -o $(TEST_DIR)/$@
+stdin_test: 	TEST_DIR = stdin_test
+stdin_test: 	TESTS_OBJS = $(STDIN_TEST_OBJS)
+stdin_test:	TITLE = Compiling Stdin test. You can perform it manually
+stdin_test:	TEST_PREPARATION = $(EXEC) $(CFLAGS) \
+			$(TESTS_OBJS) $(OBJECTS) -o $(TEST_DIR)/$(TEST_DIR)
+stdin_test:	TEST_PERFORMING = 
+stdin_test:	$(TESTS_OBJS) $(OBJECTS) $(HEADERS)
+	@echo $(CLR_HDR)"--$(TITLE)--"$(CLR_NC)
+	@$(TEST_PREPARATION)
+	@$(TEST_PERFORMING)
 
 directory_test: TEST_DIR = directory_test
-directory_test:	$(DIR_TEST_OBJS) $(OBJECTS) $(HEADERS) Makefile
-	@echo --Performing Directory Test--
-	@$(EXEC) $(CFLAGS) $(DIR_TEST_OBJS) $(OBJECTS) -o $(TEST_DIR)/$@
-	@./$(TEST_DIR)/$@
+directory_test: TESTS_OBJS = $(DIR_TEST_OBJS)
+directory_test:	TITLE = Performing directory test
+directory_test:	TEST_PREPARATION = $(EXEC) $(CFLAGS) \
+			$(TESTS_OBJS) $(OBJECTS) -o $(TEST_DIR)/$(TEST_DIR)
+directory_test:	TEST_PERFORMING = ./$(TEST_DIR)/$@
+directory_test:	$(TESTS_OBJS) $(OBJECTS) $(HEADERS)
+	@echo $(CLR_HDR)"--$(TITLE)--"$(CLR_NC)
+	@$(TEST_PREPARATION)
+	@$(TEST_PERFORMING)
 
 clean:
-	rm -f $(OBJECTS) $(TESTS_OBJS) $(TESTS_PROGS)
+	@echo Cleaning up files
+	@rm -f $(OBJECTS) $(TESTS_OBJS) $(TESTS_PROGS)
 
 fclean:			clean
-	rm -f $(NAME)
 
 re:				fclean all

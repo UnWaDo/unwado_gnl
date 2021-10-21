@@ -6,7 +6,7 @@
 /*   By: lalex <lalex@students.21-school.ru>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/13 22:05:34 by lalex             #+#    #+#             */
-/*   Updated: 2021/10/20 19:28:12 by lalex            ###   ########.fr       */
+/*   Updated: 2021/10/21 13:40:03 by lalex            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,10 @@ void stdin_test()
 
 int	main(void)
 {
-	printf("Buffer size: %d\n", BUFFER_SIZE);
+	if ((long) BUFFER_SIZE < INT32_MAX)
+		printf("Buffer size: %ld\n", (long) BUFFER_SIZE);
+	else if ((long long) BUFFER_SIZE < INT64_MAX)
+		printf("Buffer size: %lld\n", (long long) BUFFER_SIZE);
 	stdin_test();
 	return (0);
 }
