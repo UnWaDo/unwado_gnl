@@ -5,7 +5,7 @@ BONUSES = get_next_line_bonus.c get_next_line_utils_bonus.c get_next_line_bonus.
 HEADERS = $(addprefix $(GNL_DIR), $(GNL_HEADERS_NAMES))
 SOURCES = $(SOURCES_NAMES) $(addprefix $(GNL_DIR), $(GNL_SOURCES_NAMES))
 OBJECTS = $(SOURCES:.c=.o)
-EXEC = clang
+EXEC = clang-11
 CFLAGS = -Wall -Wextra -Werror
 #CFLAGS += -fsanitize=address
 ifndef BUFFER_SIZE
@@ -22,8 +22,9 @@ SIMPLE_TEST_OBJS = simple_test/main.o
 STDIN_TEST_OBJS = stdin_test/main.o
 DIR_TEST_OBJS = directory_test/main.o
 TESTS_OBJS = $(SIMPLE_TEST_OBJS) $(STDIN_TEST_OBJS) $(DIR_TEST_OBJS)
-TESTS_PROGS = simple_test/simple_test stdin_test/stdin_test directory_test/directory_test
+TESTS_PROGS = simple_test/simple_test.out stdin_test/stdin_test.out directory_test/directory_test.out
 
+Makefile:	;
 .PHONY: all clean fclean re $(TESTS)
 
 all:			$(TESTS)
@@ -58,7 +59,7 @@ simple_test:	TEST_DIR = simple_test
 simple_test:	TESTS_OBJS = $(SIMPLE_TEST_OBJS)
 simple_test:	TITLE = Performing simple test
 simple_test:	TEST_PREPARATION = $(EXEC) $(CFLAGS) \
-			$(TESTS_OBJS) $(OBJECTS) -o $(TEST_DIR)/$(TEST_DIR)
+			$(TESTS_OBJS) $(OBJECTS) -o $(TEST_DIR)/$(TEST_DIR).out
 simple_test:	TEST_PERFORMING = cd $(TEST_DIR) && bash $(TEST_DIR).sh
 simple_test: $(TESTS_OBJS) $(OBJECTS) $(HEADERS)
 	@echo $(CLR_HDR)"--$(TITLE)--"$(CLR_NC)
@@ -69,7 +70,7 @@ stdin_test: 	TEST_DIR = stdin_test
 stdin_test: 	TESTS_OBJS = $(STDIN_TEST_OBJS)
 stdin_test:	TITLE = Compiling Stdin test. You can perform it manually
 stdin_test:	TEST_PREPARATION = $(EXEC) $(CFLAGS) \
-			$(TESTS_OBJS) $(OBJECTS) -o $(TEST_DIR)/$(TEST_DIR)
+			$(TESTS_OBJS) $(OBJECTS) -o $(TEST_DIR)/$(TEST_DIR).out
 stdin_test:	TEST_PERFORMING = 
 stdin_test:	$(TESTS_OBJS) $(OBJECTS) $(HEADERS)
 	@echo $(CLR_HDR)"--$(TITLE)--"$(CLR_NC)
@@ -80,8 +81,8 @@ directory_test: TEST_DIR = directory_test
 directory_test: TESTS_OBJS = $(DIR_TEST_OBJS)
 directory_test:	TITLE = Performing directory test
 directory_test:	TEST_PREPARATION = $(EXEC) $(CFLAGS) \
-			$(TESTS_OBJS) $(OBJECTS) -o $(TEST_DIR)/$(TEST_DIR)
-directory_test:	TEST_PERFORMING = ./$(TEST_DIR)/$@
+			$(TESTS_OBJS) $(OBJECTS) -o $(TEST_DIR)/$(TEST_DIR).out
+directory_test:	TEST_PERFORMING = ./$(TEST_DIR)/$(TEST_DIR).out
 directory_test:	$(TESTS_OBJS) $(OBJECTS) $(HEADERS)
 	@echo $(CLR_HDR)"--$(TITLE)--"$(CLR_NC)
 	@$(TEST_PREPARATION)

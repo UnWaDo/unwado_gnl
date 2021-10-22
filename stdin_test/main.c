@@ -31,9 +31,9 @@ void stdin_test()
 
 int	main(void)
 {
-	if ((long) BUFFER_SIZE < INT32_MAX)
+	if ((long) BUFFER_SIZE < SSIZE_MAX)
 		printf("Buffer size: %ld\n", (long) BUFFER_SIZE);
-	else if ((long long) BUFFER_SIZE < INT64_MAX)
+	else
 		printf("Buffer size: %lld\n", (long long) BUFFER_SIZE);
 	stdin_test();
 	return (0);

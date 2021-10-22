@@ -1,4 +1,5 @@
 *.o
 gnl_test
 Makefile
-*_test
+*_test.out
+*.output

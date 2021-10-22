@@ -5,10 +5,12 @@ CLR_OK='\033[32m'
 CLR_NC='\033[0m'
 
 INPUT_FILES="empty short_line short_no_nl single_newline \
-	43_with_nl several_lines long_text"
+	43_with_nl several_lines big_line_no_nl long_text"
 for file in $INPUT_FILES; do
-	leaks --atExit -- ./simple_test texts/$file texts/$file.output > leaks.log
-	leak=$?
+	#leaks --atExit -- ./simple_test texts/$file texts/$file.output > leaks.log
+	#leak=$?
+	leak=0
+	valgrind -q --vgdb=no ./simple_test.out texts/$file texts/$file.output
 	diff=$(diff texts/$file texts/$file.output)
 	if [[ "$diff" = "" && $leak -eq 0 ]]; then
 		echo -e $CLR_OK"$file: OK"$CLR_NC
