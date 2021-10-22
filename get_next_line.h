@@ -23,36 +23,13 @@ char	*get_next_line(int fd);
 typedef struct s_fdlst {
 	int				fd;
 	char			*buffer;
+	size_t			buffer_shift;
+	size_t			buffer_size;
+	size_t			line_length;
 	struct s_fdlst	*next;
 }	t_fdlst;
 
-// Calculates the length of the zero-terminated string
-// Returns the length of string without terminating null character
-size_t	ft_strlen(const char *str);
-
-// Returns the length of line, located in string `s`
-// Returns 0 if `s` is NULL or there is no newline character
-// Returns the length of line on success
-size_t	ft_line_length(const char *s);
-
-// Allocates memory for count objects of given size and filles it with zeros
-// Returns pointer to allocated memory or NULL if allocation fails
-void	*ft_calloc(size_t count, size_t size);
-
-// Allocates new string with length ft_strlen(`str`) + `additional`
-// Copies str to the beginning of new string
-// Memory is allocated with ft_calloc
-// If allocation fails, returns NULL, returns newly
-// allocated string otherwise
-// Old string must be freed manually
-// Zero byte is not counted in `additional`
-char	*ft_realloc_str(char *str, size_t additional);
-
-// Moves bytes starting from index shift to the beginning
-// of the buffer. Fills the buffer with zeros afterwards
-void	shift_buffer(char *buffer, size_t shift);
-
-// Searches for t_fdlst with fd `fd`
+// Searches for t_fdlst with file descriptor `fd`
 // If not found, creates new t_fdlst element and
 // adds it to the beginning of `lst`
 // Finally, allocates the buffer for t_fdlst
@@ -61,30 +38,36 @@ void	shift_buffer(char *buffer, size_t shift);
 // is freed and the NULL returns
 t_fdlst	*prepare_cfd(int fd, t_fdlst **lst);
 
-// Removes t_fdlst with fd `fd` from list and frees 
-// `buffer` and itself
+// Removes t_fdlst with file descriptor `fd` from list
+// and frees `buffer` and itself
 // If `*lst` is NULL, does nothing
 // Always returns NULL
 void	*pop_fd(t_fdlst **lst, int fd);
 
-// Allocates string from `lst->buffer` including size symbols
-// from the beginning. After this modify `lst->buffer` to begin
-// with symbol [size + 1] and writing zero bytes until the end
-// of initial string
-// If allocation fails, does nothing and returns NULL
-char	*pop_beginning(t_fdlst *lst, size_t size);
+// Allocates line from `lst->buffer` including `lst->line_length` symbols
+// from the beginning. After this modifies `lst->buffer_shift`, 
+// `lst->buffer_size` and `lst->line_length` to satisfy new reality
+// If allocation fails or if either `lst` or `lst->buffer` is NULL
+// does nothing and returns NULL
+char	*pop_line(t_fdlst *cfd);
 
-// Reallocates `cfd->buffer` increasing it's size
-// to `ft_strlen(cfd->buffer)` + BUFFER_SIZE
-// Sets the `line` to resulting line
-// If read proceeds with less than BUFFER_SIZE
-// unbing `buffer` from `cfd`, so the line can be
-// used independently
-// Returns 1 if read returns value less than BUFFER_SIZE
-// and 0 in any other case
-// `line` becomes NULL if allocation fails
-// Returns `cfd->buffer` if no eof reached
-int		read_more(t_fdlst *cfd, char **line);
+// Expand buffer located in cfd to hold `BUFFER_SIZE` more characters
+// Valuable characters inside `cfd->buffer` are saved
+// If allocation fails frees `cfd->buffer` and sets it to NULL
+// If `cfd` is NULL does nothing
+void	expand_buffer(t_fdlst *cfd);
+
+// If there is BUFFER_SIZE place in `cfd->buffer`,
+// expands buffer
+// After this reads BUFFER_SIZE bytes from `cfd->fd`
+// and modifies `cfd->buffer_size` value
+void	read_more(t_fdlst *cfd);
+
+// Goes through buffer starting with
+// index `cfd->line_length` looking for newline character
+// Sets `cfd->line_length` value to the length of line
+// to be obtained with `pop_line` function
+void	scan_buffer(t_fdlst *cfd);
 
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 42

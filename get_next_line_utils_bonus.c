@@ -12,79 +12,113 @@
 
 #include "get_next_line.h"
 
-size_t	ft_strlen(const char *str)
+t_fdlst	*prepare_cfd(int fd, t_fdlst **lst)
 {
-	size_t	len;
+	t_fdlst			*cfd;
 
+	cfd = *lst;
+	while (cfd && cfd->fd != fd)
+		cfd = cfd->next;
+	if (cfd)
+		return (cfd);
+	cfd = malloc(sizeof (*cfd));
+	if (!cfd)
+		return (NULL);
+	cfd->fd = fd;
+	cfd->next = *lst;
+	*lst = cfd;
+	cfd->line_length = 0;
+	cfd->buffer = malloc(((ssize_t) BUFFER_SIZE) + 1);
+	cfd->buffer_shift = 0;
+	cfd->buffer_size = 0;
+	if (cfd->buffer == NULL)
+		return (pop_fd(lst, fd));
+	cfd->buffer[cfd->buffer_size] = 0;
+	return (cfd);
+}
+
+void	*pop_fd(t_fdlst **lst, int fd)
+{
+	t_fdlst	*previous;
+	t_fdlst	*current;
+
+	current = *lst;
+	while (current && current->fd != fd)
+	{
+		previous = current;
+		current = current->next;
+	}
+	if (!current)
+		return (NULL);
+	if (current == *lst)
+		*lst = current->next;
+	else
+		previous->next = current->next;
+	if (current->buffer)
+		free(current->buffer);
+	free(current);
+	return (NULL);
+}
+
+char	*pop_line(t_fdlst *cfd)
+{
+	char	*str;
+	size_t	pos;
+
+	if (cfd == NULL || cfd->buffer == NULL)
+		return (NULL);
+	str = malloc(cfd->line_length + 1);
 	if (!str)
-		return (0);
-	len = 0;
-	while (str[len])
-		len++;
-	return (len);
-}
-
-size_t	ft_line_length(const char *s)
-{
-	size_t	len;
-
-	if (!s)
-		return (0);
-	len = 0;
-	while (s[len] && s[len] != '\n')
-		len++;
-	if (s[len] == '\n')
-		return (len + 1);
-	return (0);
-}
-
-void	*ft_calloc(size_t count, size_t size)
-{
-	char	*res;
-	size_t	len;
-
-	len = count * size;
-	res = malloc(len);
-	if (!res)
 		return (NULL);
-	while (len--)
-		res[len] = 0;
-	return (res);
-}
-
-char	*ft_realloc_str(char *str, size_t additional)
-{
-	size_t	length;
-	size_t	pos;
-	char	*copy;
-
-	length = ft_strlen(str);
-	copy = ft_calloc(length + additional + 1, sizeof (*copy));
-	if (!copy)
-		return (NULL);
+	str[cfd->line_length] = 0;
 	pos = 0;
-	while (pos < length)
+	while (pos < cfd->line_length)
 	{
-		copy[pos] = str[pos];
+		str[pos] = cfd->buffer[cfd->buffer_shift + pos];
 		pos++;
 	}
-	return (copy);
+	cfd->buffer_shift += cfd->line_length;
+	cfd->buffer_size -= cfd->line_length;
+	cfd->line_length = 0;
+	return (str);
 }
 
-void	shift_buffer(char *buffer, size_t shift)
+void	expand_buffer(t_fdlst *cfd)
+{
+	char	*new;
+	size_t	pos;
+
+	if (cfd == NULL || cfd->buffer == NULL)
+		return ;
+	new = malloc(cfd->buffer_size + ((size_t) BUFFER_SIZE) + 1);
+	if (new == NULL)
+	{
+		free(cfd->buffer);
+		cfd->buffer = NULL;
+		cfd->buffer_size = 0;
+		return ;
+	}
+	pos = 0;
+	while (pos < cfd->buffer_size)
+	{
+		new[pos] = cfd->buffer[cfd->buffer_shift + pos];
+		pos++;
+	}
+	free(cfd->buffer);
+	cfd->buffer = new;
+	cfd->buffer_shift = 0;
+}
+
+void	scan_buffer(t_fdlst *cfd)
 {
 	size_t	pos;
 
-	pos = shift;
-	while (buffer[pos])
+	pos = cfd->line_length;
+	while (pos < cfd->buffer_size)
 	{
-		buffer[pos - shift] = buffer[pos];
-		buffer[pos] = 0;
 		pos++;
+		if (cfd->buffer[cfd->buffer_shift + pos - 1] == '\n')
+			break ;
 	}
-	while (buffer[pos - shift])
-	{
-		buffer[pos - shift] = 0;
-		pos++;
-	}
+	cfd->line_length = pos;
 }
