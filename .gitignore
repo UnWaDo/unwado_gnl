@@ -1,5 +1,5 @@
 *.o
 gnl_test
-Makefile
 *_test.out
 *.output
+leaks.log
