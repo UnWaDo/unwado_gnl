@@ -6,7 +6,7 @@
 /*   By: lalex <lalex@students.21-school.ru>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/13 21:59:05 by lalex             #+#    #+#             */
-/*   Updated: 2021/10/21 14:12:02 by lalex            ###   ########.fr       */
+/*   Updated: 2021/10/23 14:14:07 by lalex            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,16 +16,16 @@ void	read_more(t_fdlst *cfd)
 {
 	ssize_t	length;
 
-	if (cfd->buffer_size || cfd->buffer_shift)
+	if (cfd->buffer_size)
 		expand_buffer(cfd);
 	if (cfd->buffer == NULL)
 		return ;
-	length = read(cfd->fd, cfd->buffer + \
-		cfd->buffer_shift + cfd->buffer_size, \
+	cfd->buffer_shift = 0;
+	length = read(cfd->fd, cfd->buffer + cfd->buffer_size, \
 		(size_t) BUFFER_SIZE);
 	if (length > 0)
 		cfd->buffer_size = cfd->buffer_size + length;
-	cfd->buffer[cfd->buffer_shift + cfd->buffer_size] = 0;
+	cfd->buffer[cfd->buffer_size] = 0;
 }
 
 char	*get_next_line(int fd)
