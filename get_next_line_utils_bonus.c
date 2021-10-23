@@ -28,7 +28,7 @@ t_fdlst	*prepare_cfd(int fd, t_fdlst **lst)
 	cfd->next = *lst;
 	*lst = cfd;
 	cfd->line_length = 0;
-	cfd->buffer = malloc(((ssize_t)(BUFFER_SIZE)) + 1);
+	cfd->buffer = malloc(((size_t)(BUFFER_SIZE)) + 1);
 	cfd->buffer_shift = 0;
 	cfd->buffer_size = 0;
 	if (cfd->buffer == NULL)
