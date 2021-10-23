@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "lines.h"
+#include <stdio.h>
 
 t_line	*create_line(char *line)
 {

@@ -23,7 +23,8 @@ CLR_NC = '\033[0m'
 CLR_STRT = '\033[0;36m'
 
 TESTS = init check_files simple_test stdin_test directory_test \
-	per_line_test bonus_test
+	per_line_test
+BONUS_TESTS = init bonus_test
 SIMPLE_TEST_OBJS = simple_test/main.o
 STDIN_TEST_OBJS = stdin_test/main.o
 DIR_TEST_OBJS = directory_test/main.o
@@ -36,9 +37,11 @@ TESTS_PROGS = simple_test/simple_test.out stdin_test/stdin_test.out \
 	bonus_test/bonus_test.out
 
 Makefile:	;
-.PHONY: all clean fclean re $(TESTS)
+.PHONY: all clean fclean re $(TESTS) bonus $(BONUS_TESTS)
 
 all:			$(TESTS)
+
+bonus:			$(BONUS_TESTS)
 
 %_bonus.o: 		%_bonus.c $(BONUS_HEADERS)
 	@$(EXEC) $(CFLAGS) -o $@ -c $< $(BUFFER_FLAG) -I$(GNL_DIR)

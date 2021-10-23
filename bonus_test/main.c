@@ -16,41 +16,100 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+static size_t	count_files(FILE **files)
+{
+	size_t	len;
+
+	len = 0;
+	while (files[len])
+		len++;
+	return (len);
+}
+
+static size_t	count_fds(int *fds)
+{
+	size_t	len;
+
+	len = 0;
+	while (fds[len] != -1)
+		len++;
+	return (len);
+}
+
+int	*create_eofs(size_t len)
+{
+	int	*eofs;
+
+	eofs = malloc(len * sizeof (*eofs));
+	if (!eofs)
+		return (NULL);
+	while (len--)
+		eofs[len] = 0;
+	return (eofs);
+}
+
+int	is_all_read(int *eofs, size_t count)
+{
+	size_t	i;
+
+	i = 0;
+	while (i < count && eofs[i] == 1)
+		i++;
+	if (i < count)
+		return (0);
+	return (1);
+}
+
 t_line	*read_files(FILE **files)
 {
 	t_line	*lines;
 	t_line	*new;
 	char	*line;
-	size_t	len;
-	size_t	pos;
-	int		some_non_empty;
+	size_t	line_length;
+	size_t	files_number;
+	size_t	files_iterator;
+	int		*eofs;
 
+	files_number = count_files(files);
+	eofs = create_eofs(files_number);
+	if (!eofs)
+		return (NULL);
 	lines = NULL;
-	line = NULL;
-	len = 0;
+	line_length = 0;
 	do {
-		some_non_empty = 0;
-		pos = 0;
-		while (files[pos])
+		files_iterator = 0;
+		while (files_iterator < files_number)
 		{
-			if (getline(&line, &len, files[pos]) != -1)
-				some_non_empty = 1;
+			if (eofs[files_iterator])
+			{
+				files_iterator++;
+				continue ;
+			}
+			if (getline(&line, &line_length, files[files_iterator]) == -1)
+			{
+				if (line)
+					free(line);
+				line = NULL;
+				eofs[files_iterator] = 1;
+			}
 			new = create_line(line);
 			if (!new)
 			{
 				if (line)
 					free(line);
 				clean_lines(lines);
+				free(eofs);
 				return (NULL);
 			}
 			line = NULL;
-			len = 0;
+			line_length = 0;
 			append_line(&lines, new);
-			pos++;
+			files_iterator++;
 		}
-	} while (some_non_empty);
+	} while (is_all_read(eofs, files_number) == 0);
 	if (line)
 		free(line);
+	free(eofs);
 	return (lines);
 }
 
@@ -59,32 +118,43 @@ t_line	*read_files_by_gnl(int *fds)
 	t_line	*lines;
 	t_line	*new;
 	char	*line;
-	size_t	pos;
-	int		some_non_empty;
+	size_t	fds_number;
+	size_t	fds_iterator;
+	int		*eofs;
 
+	fds_number = count_fds(fds);
+	eofs = create_eofs(fds_number);
+	if (!eofs)
+		return (NULL);
 	lines = NULL;
 	do {
-		some_non_empty = 0;
-		pos = 0;
-		while (fds[pos] != -1)
+		fds_iterator = 0;
+		while (fds_iterator < fds_number)
 		{
-			line = get_next_line(fds[pos]);
-			if (line)
-				some_non_empty = 1;
+			if (eofs[fds_iterator])
+			{
+				fds_iterator++;
+				continue ;
+			}
+			line = get_next_line(fds[fds_iterator]);
+			if (!line)
+				eofs[fds_iterator] = 1;
 			new = create_line(line);
 			if (!new)
 			{
 				if (line)
 					free(line);
 				clean_lines(lines);
+				free(eofs);
 				return (NULL);
 			}
 			append_line(&lines, new);
-			pos++;
+			fds_iterator++;
 		}
-	} while (some_non_empty);
+	} while (is_all_read(eofs, fds_number) == 0);
 	if (line)
 		free(line);
+	free(eofs);
 	return (lines);
 }
 
