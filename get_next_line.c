@@ -22,7 +22,7 @@ void	read_more(t_fdlst *cfd)
 		return ;
 	cfd->buffer_shift = 0;
 	length = read(cfd->fd, cfd->buffer + cfd->buffer_size, \
-		(size_t) BUFFER_SIZE);
+		(size_t) (BUFFER_SIZE));
 	if (length > 0)
 		cfd->buffer_size = cfd->buffer_size + length;
 	cfd->buffer[cfd->buffer_size] = 0;
@@ -34,7 +34,7 @@ char	*get_next_line(int fd)
 	t_fdlst			*cfd;
 	char			*line;
 
-	if ((ssize_t) BUFFER_SIZE < 1 || (size_t) BUFFER_SIZE > (size_t) SSIZE_MAX)
+	if ((ssize_t) (BUFFER_SIZE) < 1 || (size_t) (BUFFER_SIZE) > (size_t) SSIZE_MAX)
 		return (NULL);
 	cfd = prepare_cfd(fd, &fds);
 	if (!cfd)
