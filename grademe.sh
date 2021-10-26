@@ -7,7 +7,9 @@ make re BUFFER_SIZE=1000000
 make re BUFFER_SIZE="'42 / 2'"
 # This tests may be long, uncomment it if you want
 # make re BUFFER_SIZE=INT_MAX
-$make re BUFFER_SIZE="'SSIZE_MAX + 1'"
+# I believe this test should give run-time NULL or compile-time error
+# Try it yourself
+# make re BUFFER_SIZE="'SSIZE_MAX + 1'"
 
 if [[ "$1" == "bonus" ]]; then
     make clean bonus BUFFER_SIZE=-10
