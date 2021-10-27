@@ -6,7 +6,7 @@
 /*   By: lalex <lalex@students.21-school.ru>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/13 22:05:34 by lalex             #+#    #+#             */
-/*   Updated: 2021/10/23 14:11:54 by lalex            ###   ########.fr       */
+/*   Updated: 2021/10/27 20:25:58 by lalex            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,8 @@ t_line	*read_files(FILE **files)
 				files_iterator++;
 				continue ;
 			}
+			line = NULL;
+			line_length = 0;
 			if (getline(&line, &line_length, files[files_iterator]) == -1)
 			{
 				if (line)
@@ -101,8 +103,6 @@ t_line	*read_files(FILE **files)
 				free(eofs);
 				return (NULL);
 			}
-			line = NULL;
-			line_length = 0;
 			append_line(&lines, new);
 			files_iterator++;
 		}
@@ -205,7 +205,6 @@ int	main(void)
 		"texts/long_text",
 		NULL
 	};
-
 	bonus_test((const char **) files);
 	return (0);
 }

@@ -7,12 +7,16 @@ HEADERS = $(addprefix $(GNL_DIR), $(GNL_HEADERS_NAMES))
 SOURCES = $(addprefix $(GNL_DIR), $(GNL_SOURCES_NAMES))
 OBJECTS = $(SOURCES:.c=.o)
 
+MEMCHEKER = ./leaks.sh
+
 BONUS_HEADERS = $(addprefix $(GNL_DIR), $(GNL_BONUS_HEADERS_NAMES))
 BONUS_SOURCES = $(addprefix $(GNL_DIR), $(GNL_BONUS_SOURCES_NAMES))
 BONUS_OBJS = $(BONUS_SOURCES:.c=.o)
 EXEC = clang
 CFLAGS = -Wall -Wextra -Werror
-#CFLAGS += -fsanitize=address
+# leaks and valgrind can not work with fsanitize
+# CFLAGS += -fsanitize=address
+# MEMCHEKER = 
 ifndef BUFFER_SIZE
 	BUFFER_SIZE = 42
 endif
@@ -95,7 +99,7 @@ directory_test:		TEST_DIR = directory_test
 directory_test: 	TITLE = Performing directory test
 directory_test: 	TEST_PREPARATION = $(EXEC) $(CFLAGS) \
 			$(DIR_TEST_OBJS) $(OBJECTS) -o $(TEST_DIR)/$(TEST_DIR).out
-directory_test: 	TEST_PERFORMING = ./$(TEST_DIR)/$(TEST_DIR).out
+directory_test: 	TEST_PERFORMING = $(MEMCHEKER) ./$(TEST_DIR)/$(TEST_DIR).out
 directory_test: 	$(DIR_TEST_OBJS) $(OBJECTS) $(HEADERS)
 	@echo $(CLR_HDR)"--$(TITLE)--"$(CLR_NC)
 	@$(TEST_PREPARATION)
@@ -105,7 +109,7 @@ per_line_test: 		TEST_DIR = per_line_test
 per_line_test: 		TITLE = Performing per line test
 per_line_test: 		TEST_PREPARATION = $(EXEC) $(CFLAGS) \
 			$(PER_LINE_TEST_OBJS) $(OBJECTS) -o $(TEST_DIR)/$(TEST_DIR).out
-per_line_test: 		TEST_PERFORMING = cd $(TEST_DIR) && ./$(TEST_DIR).out
+per_line_test: 		TEST_PERFORMING = $(MEMCHEKER) $(TEST_DIR) ./$(TEST_DIR).out
 per_line_test: 		$(PER_LINE_TEST_OBJS) $(OBJECTS) $(HEADERS)
 	@echo $(CLR_HDR)"--$(TITLE)--"$(CLR_NC)
 	@$(TEST_PREPARATION)
@@ -116,7 +120,7 @@ bonus_test: 		TESTS_OBJS = $(BONUS_TEST_OBJS)
 bonus_test: 		TITLE = Performing bonus multiple FD test
 bonus_test: 		TEST_PREPARATION = $(EXEC) $(CFLAGS) \
 			$(TESTS_OBJS) $(BONUS_OBJS) -o $(TEST_DIR)/$(TEST_DIR).out
-bonus_test: 		TEST_PERFORMING = cd $(TEST_DIR) && ./$(TEST_DIR).out
+bonus_test: 		TEST_PERFORMING = $(MEMCHEKER) $(TEST_DIR) ./$(TEST_DIR).out
 bonus_test: 		$(BONUS_TEST_OBJS) $(BONUS_OBJS) $(BONUS_HEADERS)
 	@echo $(CLR_HDR)"--$(TITLE)--"$(CLR_NC)
 	@$(TEST_PREPARATION)
