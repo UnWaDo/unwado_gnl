@@ -6,7 +6,7 @@
 /*   By: lalex <lalex@students.21-school.ru>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/13 21:59:05 by lalex             #+#    #+#             */
-/*   Updated: 2021/10/23 14:14:31 by lalex            ###   ########.fr       */
+/*   Updated: 2021/10/27 20:30:47 by lalex            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ char	*get_next_line(int fd)
 	}
 	if (cfd->line_length)
 		line = pop_line(cfd);
-	if (!line)
+	if (!line || cfd->buffer_size == 0)
 		pop_fd(&fds, fd);
 	return (line);
 }
